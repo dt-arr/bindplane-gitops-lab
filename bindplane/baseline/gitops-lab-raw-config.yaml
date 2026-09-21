@@ -1,0 +1,36 @@
+apiVersion: bindplane.observiq.com/v1
+kind: Configuration
+metadata:
+    name: gitops-lab-raw-config
+    labels:
+        agent-type: bindplane-otel-collector
+        platform: linux
+spec:
+    contentType: raw
+    measurementInterval: ""
+    topologyInterval: ""
+    disableLegacyEnvVarNormalization: false
+    raw: |
+        receivers:
+          otlp:
+            protocols:
+              grpc:
+                endpoint: 0.0.0.0:4317
+              http:
+                endpoint: 0.0.0.0:4318
+        exporters:
+          nop:
+        service:
+          pipelines:
+            logs:
+              receivers: [otlp]
+              exporters: [nop]
+            metrics:
+              receivers: [otlp]
+              exporters: [nop]
+            traces:
+              receivers: [otlp]
+              exporters: [nop]
+    selector:
+        matchLabels:
+            gitops-lab-id: gitops-lab-roundtrip-20260921

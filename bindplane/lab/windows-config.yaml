@@ -1,0 +1,252 @@
+apiVersion: bindplane.observiq.com/v2
+kind: Configuration
+metadata:
+    name: windows
+    labels:
+        agent-type: observiq-otel-collector
+        platform: windows
+        role: gateway
+spec:
+    contentType: ""
+    measurementInterval: ""
+    topologyInterval: ""
+    disableLegacyEnvVarNormalization: false
+    sources:
+        - id: 01M2M5GMC88HASJV6R9KV1C7VB
+          displayName: Logs-Receiver
+          type: bindplane_gateway
+          parameters:
+            - name: telemetry_types
+              value:
+                - Logs
+                - Metrics
+                - Traces
+            - name: listen_address
+              value: 0.0.0.0
+            - name: grpc_port
+              value: 4317
+            - name: http_port
+              value: 4318
+            - name: grpc_max_recv_msg_size_mib
+              value: 20
+            - name: enable_tls
+              value: false
+            - name: cert_file
+              value: ""
+            - name: key_file
+              value: ""
+            - name: mutual_tls
+              value: false
+            - name: ca_file
+              value: ""
+            - name: enable_grpc_timeout
+              value: true
+            - name: grpc_max_connection_idle
+              value: 60
+            - name: grpc_max_connection_age
+              value: 60
+            - name: grpc_max_connection_age_grace
+              value: 300
+            - name: enable_http_timeout
+              value: true
+            - name: http_read_timeout
+              value: 0
+            - name: http_read_header_timeout
+              value: 60
+            - name: http_write_timeout
+              value: 30
+            - name: http_idle_timeout
+              value: 60
+            - name: enable_topology
+              value: true
+            - name: topology_interval
+              value: 1m
+            - name: include_metadata
+              value: false
+            - name: enable_cors
+              value: false
+            - name: cors_allowed_origins
+              value: []
+            - name: cors_allowed_headers
+              value: []
+            - name: cors_max_age
+              value: 0
+          routes:
+            logs:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+            metrics:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+            traces:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+        - id: 01M2M9GF8FWS4D56HD1YKSFS7K
+          displayName: syslog-UDP-5140
+          type: syslog
+          parameters:
+            - name: listen_ip
+              value: 0.0.0.0
+            - name: listen_port
+              value: 5140
+            - name: protocol
+              value: rfc3164
+            - name: connection_type
+              value: udp
+            - name: data_flow
+              value: high
+            - name: enable_octet_counting
+              value: false
+            - name: enable_non_transparent_framing_trailer
+              value: false
+            - name: non_transparent_framing_trailer
+              value: LF
+            - name: log_type
+              value: ""
+            - name: timezone
+              value: UTC
+            - name: parse_to
+              value: body
+            - name: multiline_parsing
+              value: none
+            - name: multiline_line_start_pattern
+              value: ""
+            - name: multiline_line_end_pattern
+              value: ""
+            - name: add_attributes
+              value: false
+            - name: preserve_leading_whitespaces
+              value: false
+            - name: preserve_trailing_whitespaces
+              value: false
+            - name: enable_mutual_tls
+              value: false
+            - name: cert_file
+              value: ""
+            - name: key_file
+              value: ""
+            - name: ca_file
+              value: ""
+            - name: tls_min_version
+              value: "1.2"
+            - name: max_log_size
+              value: 1MiB
+            - name: async_readers
+              value: 1
+            - name: async_processors
+              value: 3
+            - name: max_queue_length
+              value: 100
+          routes:
+            logs:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+        - id: 01M2M9GWS3EFHVAP37SV35EJPB
+          displayName: netflow
+          type: netflow
+          parameters:
+            - name: telemetry_types
+              value:
+                - Logs
+            - name: scheme
+              value: netflow
+            - name: hostname
+              value: 0.0.0.0
+            - name: port
+              value: 2055
+            - name: sockets
+              value: 1
+            - name: workers
+              value: 1
+            - name: send_raw
+              value: false
+          routes:
+            logs:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+        - id: 01M2M9X95JE81RJYGPVS00N59E
+          displayName: windows-events
+          type: windowsevents_v3
+          parameters:
+            - name: use_xml_query
+              value: false
+            - name: system_event_input
+              value: true
+            - name: app_event_input
+              value: true
+            - name: security_event_input
+              value: true
+            - name: forwarded_events_input
+              value: false
+            - name: powershell_event_input
+              value: false
+            - name: sysmon_event_input
+              value: false
+            - name: dns_server_event_input
+              value: false
+            - name: mssql_event_input
+              value: false
+            - name: mssql_instance_names
+              value:
+                - MSSQLSERVER
+            - name: custom_channels
+              value: []
+            - name: query
+              value: |
+                <QueryList>
+                  <Query Id="0" Path="System">
+                    <Select>*</Select>
+                  </Query>
+                </QueryList>
+            - name: start_at
+              value: end
+            - name: use_polling_collection_mode
+              value: false
+            - name: poll_interval
+              value: 5
+            - name: wait_timeout
+              value: 5
+            - name: resolve_sids_enabled
+              value: false
+            - name: resolve_sids_cache_size
+              value: 10000
+            - name: resolve_sids_cache_ttl
+              value: 15m
+            - name: raw_logs
+              value: true
+            - name: event_data_format
+              value: map
+            - name: suppress_rendering_info
+              value: true
+            - name: include_log_record_original
+              value: true
+            - name: ignore_channel_errors
+              value: true
+            - name: enable_offset_storage
+              value: true
+            - name: offset_storage_dir
+              value: storage
+            - name: retry_on_failure_enabled
+              value: true
+            - name: retry_on_failure_initial_interval
+              value: 1
+            - name: retry_on_failure_max_interval
+              value: 30
+            - name: retry_on_failure_max_elapsed_time
+              value: 300
+          routes:
+            logs:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+    destinations:
+        - id: d-null-destination
+          name: null-destination
+    selector:
+        matchLabels:
+            configuration: windows

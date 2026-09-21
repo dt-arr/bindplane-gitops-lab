@@ -1,0 +1,254 @@
+# Generated OTel config for windows:6 — do not apply directly to BindPlane.
+# Retrieved with: bindplane get configurations windows -o raw --profile gitops-lab
+# This is what the collector receives via OpAMP.
+receivers:
+    netflow/s-01M2M9GWS3EFHVAP37SV35EJPB:
+        hostname: 0.0.0.0
+        port: 2055
+        scheme: netflow
+        send_raw: false
+        sockets: 1
+        workers: 1
+    otlp/s-01M2M5GMC88HASJV6R9KV1C7VB:
+        protocols:
+            grpc:
+                endpoint: 0.0.0.0:4317
+                include_metadata: true
+                keepalive:
+                    server_parameters:
+                        max_connection_age: 1m0s
+                        max_connection_age_grace: 5m0s
+                        max_connection_idle: 1m0s
+                        time: 2h
+                        timeout: 20s
+                max_recv_msg_size_mib: 20
+            http:
+                endpoint: 0.0.0.0:4318
+                idle_timeout: 1m0s
+                include_metadata: true
+                read_header_timeout: 1m0s
+                write_timeout: 30s
+    syslog/s-01M2M9GF8FWS4D56HD1YKSFS7K:
+        location: UTC
+        operators:
+            - from: body
+              id: save_log_record_original
+              to: attributes["log.record.original"]
+              type: copy
+            - from: attributes.appname
+              id: move_appname
+              if: attributes.appname != nil
+              to: body.appname
+              type: move
+            - from: attributes.facility
+              id: move_facility
+              if: attributes.facility != nil
+              to: body.facility
+              type: move
+            - from: attributes.hostname
+              id: move_hostname
+              if: attributes.hostname != nil
+              to: body.hostname
+              type: move
+            - from: attributes.message
+              id: move_message
+              if: attributes.message != nil
+              to: body.message
+              type: move
+            - from: attributes.msg_id
+              id: move_msg_id
+              if: attributes.msg_id != nil
+              to: body.msg_id
+              type: move
+            - from: attributes.priority
+              id: move_priority
+              if: attributes.priority != nil
+              to: body.priority
+              type: move
+            - from: attributes.proc_id
+              id: move_proc_id
+              if: attributes.proc_id != nil
+              to: body.proc_id
+              type: move
+            - from: attributes.severity
+              id: move_severity
+              if: attributes.severity != nil
+              to: body.severity
+              type: move
+            - from: attributes.structured_data
+              id: move_structured_data
+              if: attributes.structured_data != nil
+              to: body.structured_data
+              type: move
+            - from: attributes.timestamp
+              id: move_timestamp
+              if: attributes.timestamp != nil
+              to: body.timestamp
+              type: move
+            - from: attributes.version
+              id: move_version
+              if: attributes.version != nil
+              to: body.version
+              type: move
+        protocol: rfc3164
+        udp:
+            add_attributes: false
+            async:
+                max_queue_length: 100
+                processors: 3
+                readers: 1
+            listen_address: 0.0.0.0:5140
+    windows_event_log/s-01M2M9X95JE81RJYGPVS00N59E__application:
+        attributes:
+            log_type: windows_event.application
+        channel: Application
+        event_data_format: map
+        event_driven_scraping: true
+        ignore_channel_errors: true
+        include_log_record_original: true
+        raw: true
+        retry_on_failure:
+            enabled: true
+            initial_interval: 1s
+            max_elapsed_time: 300s
+            max_interval: 30s
+        start_at: end
+        storage: file_storage/s-01M2M9X95JE81RJYGPVS00N59E
+        suppress_rendering_info: true
+        wait_timeout: 5s
+    windows_event_log/s-01M2M9X95JE81RJYGPVS00N59E__security:
+        attributes:
+            log_type: windows_event.security
+        channel: Security
+        event_data_format: map
+        event_driven_scraping: true
+        ignore_channel_errors: true
+        include_log_record_original: true
+        raw: true
+        retry_on_failure:
+            enabled: true
+            initial_interval: 1s
+            max_elapsed_time: 300s
+            max_interval: 30s
+        start_at: end
+        storage: file_storage/s-01M2M9X95JE81RJYGPVS00N59E
+        suppress_rendering_info: true
+        wait_timeout: 5s
+    windows_event_log/s-01M2M9X95JE81RJYGPVS00N59E__system:
+        attributes:
+            log_type: windows_event.system
+        channel: System
+        event_data_format: map
+        event_driven_scraping: true
+        ignore_channel_errors: true
+        include_log_record_original: true
+        raw: true
+        retry_on_failure:
+            enabled: true
+            initial_interval: 1s
+            max_elapsed_time: 300s
+            max_interval: 30s
+        start_at: end
+        storage: file_storage/s-01M2M9X95JE81RJYGPVS00N59E
+        suppress_rendering_info: true
+        wait_timeout: 5s
+processors:
+    resource_detection/s-01M2M9GF8FWS4D56HD1YKSFS7K:
+        detectors:
+            - system
+        system:
+            hostname_sources:
+                - os
+    resource_detection/s-01M2M9X95JE81RJYGPVS00N59E:
+        detectors:
+            - system
+        system:
+            hostname_sources:
+                - os
+    transform/null-destination__drop-raw-copy:
+        log_statements:
+            - context: log
+              statements:
+                - delete_key(attributes, "log.record.original")
+connectors:
+    forward/d-d-null-destination: null
+exporters:
+    nop/null-destination: null
+extensions:
+    file_storage/s-01M2M9X95JE81RJYGPVS00N59E:
+        compaction:
+            directory: ${OIQ_OTEL_COLLECTOR_HOME}/storage
+            on_rebound: true
+        directory: ${OIQ_OTEL_COLLECTOR_HOME}/storage
+service:
+    extensions:
+        - file_storage/s-01M2M9X95JE81RJYGPVS00N59E
+    pipelines:
+        logs/d-d-null-destination:
+            receivers:
+                - forward/d-d-null-destination
+            processors:
+                - transform/null-destination__drop-raw-copy
+            exporters:
+                - nop/null-destination
+        logs/s-01M2M5GMC88HASJV6R9KV1C7VB:
+            receivers:
+                - otlp/s-01M2M5GMC88HASJV6R9KV1C7VB
+            processors: []
+            exporters:
+                - forward/d-d-null-destination
+        logs/s-01M2M9GF8FWS4D56HD1YKSFS7K:
+            receivers:
+                - syslog/s-01M2M9GF8FWS4D56HD1YKSFS7K
+            processors:
+                - resource_detection/s-01M2M9GF8FWS4D56HD1YKSFS7K
+            exporters:
+                - forward/d-d-null-destination
+        logs/s-01M2M9GWS3EFHVAP37SV35EJPB:
+            receivers:
+                - netflow/s-01M2M9GWS3EFHVAP37SV35EJPB
+            processors: []
+            exporters:
+                - forward/d-d-null-destination
+        logs/s-01M2M9X95JE81RJYGPVS00N59E:
+            receivers:
+                - windows_event_log/s-01M2M9X95JE81RJYGPVS00N59E__system
+                - windows_event_log/s-01M2M9X95JE81RJYGPVS00N59E__application
+                - windows_event_log/s-01M2M9X95JE81RJYGPVS00N59E__security
+            processors:
+                - resource_detection/s-01M2M9X95JE81RJYGPVS00N59E
+            exporters:
+                - forward/d-d-null-destination
+        metrics/d-d-null-destination:
+            receivers:
+                - forward/d-d-null-destination
+            processors: []
+            exporters:
+                - nop/null-destination
+        metrics/s-01M2M5GMC88HASJV6R9KV1C7VB:
+            receivers:
+                - otlp/s-01M2M5GMC88HASJV6R9KV1C7VB
+            processors: []
+            exporters:
+                - forward/d-d-null-destination
+        traces/d-d-null-destination:
+            receivers:
+                - forward/d-d-null-destination
+            processors: []
+            exporters:
+                - nop/null-destination
+        traces/s-01M2M5GMC88HASJV6R9KV1C7VB:
+            receivers:
+                - otlp/s-01M2M5GMC88HASJV6R9KV1C7VB
+            processors: []
+            exporters:
+                - forward/d-d-null-destination
+    telemetry:
+        metrics:
+            readers:
+                - pull:
+                    exporter:
+                        prometheus:
+                            host: localhost
+                            port: 8888
+            level: detailed

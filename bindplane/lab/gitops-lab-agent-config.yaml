@@ -1,0 +1,57 @@
+apiVersion: bindplane.observiq.com/v2
+kind: Configuration
+metadata:
+    name: gitops-lab-agent-config
+    labels:
+        agent-type: observiq-otel-collector
+        platform: windows
+spec:
+    sources:
+        - displayName: Bindplane Agent
+          type: bindplane-agent
+          parameters:
+            - name: telemetry_types
+              value:
+                - Logs
+                - Metrics
+            - name: log_path
+              value: log/collector.log
+            - name: updater_log_path
+              value: log/updater.log
+            - name: enable_stderr_log
+              value: true
+            - name: stderr_log_path_windows
+              value: log/observiq_collector.err
+            - name: start_at
+              value: end
+            - name: enable_offset_storage
+              value: true
+            - name: offset_storage_dir
+              value: storage
+            - name: process_metrics
+              value: true
+            - name: receiver_metrics
+              value: true
+            - name: processor_metrics
+              value: true
+            - name: exporter_metrics
+              value: true
+            - name: metrics_port
+              value: 8888
+            - name: collection_interval
+              value: 60
+          routes:
+            logs:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+            metrics:
+                - id: "0"
+                  components:
+                    - destinations/d-null-destination
+    destinations:
+        - id: d-null-destination
+          name: null-destination
+    selector:
+        matchLabels:
+            configuration: gitops-lab-agent-config

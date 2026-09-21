@@ -1,0 +1,27 @@
+apiVersion: bindplane.observiq.com/v1
+kind: Configuration
+metadata:
+  name: gitops-lab-raw-config
+  labels:
+    platform: windows
+    agent-type: observiq-otel-collector
+spec:
+  contentType: raw
+  raw: |
+    receivers:
+      filelog/agent-logs:
+        include:
+          - ${OIQ_OTEL_COLLECTOR_HOME}/log/collector.log
+        start_at: end
+        resource:
+          collector.name: windows-collector
+    exporters:
+      nop:
+    service:
+      pipelines:
+        logs:
+          receivers: [filelog/agent-logs]
+          exporters: [nop]
+  selector:
+    matchLabels:
+      configuration: gitops-lab-raw-config
