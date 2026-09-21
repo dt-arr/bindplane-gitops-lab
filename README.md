@@ -23,6 +23,7 @@ bindplane-gitops-lab/
 │   ├── cli-commands.md
 │   ├── test-plan.md
 │   └── results.md
+├── img/                           # Screenshots referenced in this README
 ├── scripts/
 │   └── Use-LabCli.ps1         # Dot-source to add CLI to PATH in current session
 └── README.md
@@ -176,6 +177,12 @@ spec:
 - Assign a collector by labelling it with `configuration=gitops-lab-raw-config`
 - UI shows a plain YAML editor — no visual pipeline
 
+**BindPlane UI — raw config (YAML editor view):**
+![Raw config YAML editor](img/gitops-lab-raw-config-bindplane-screenshot.png)
+
+**BindPlane UI — recent telemetry for raw config:**
+![Raw config recent telemetry](img/gitops-lab-raw-config-bindplane-view-recent-telemetry.png)
+
 ### Apply and roll out
 
 ```powershell
@@ -287,6 +294,12 @@ spec:
 - UI shows the visual pipeline builder with source/destination tiles and routing lines
 - After export, source IDs (server-assigned ULIDs) appear — keep them in the tracked file
 
+**BindPlane UI — modular config (visual pipeline view):**
+![Modular config visual pipeline](img/gitops-lab-agent-config-screenshot.png)
+
+**BindPlane UI — recent telemetry with processors expanded:**
+![Modular config recent telemetry with processors](img/gitops-lab-agent-config-bindplane-view-recent-with-processors.png)
+
 ### Apply and roll out
 
 ```powershell
@@ -307,6 +320,43 @@ bindplane get configurations gitops-lab-agent-config --export -o yaml --profile 
 ```
 
 The export is in the same v2 modular format. Source IDs are included — keep them so re-applying updates existing sources rather than creating duplicates.
+
+---
+
+## Getting the generated OTel YAML from a modular config
+
+For any modular config, Bindplane generates the actual OTel YAML that gets delivered to the collector. This is useful for debugging, auditing, or understanding what is actually running.
+
+```powershell
+bindplane get configurations gitops-lab-agent-config -o raw --profile <profile>
+```
+
+Save it for reference (not for re-applying):
+
+```powershell
+bindplane get configurations gitops-lab-agent-config -o raw --profile <profile> `
+  > bindplane/generated-otel/gitops-lab-agent-config-generated.yaml
+```
+
+**What you will see in the output:**
+- Receiver names suffixed with internal ULIDs: `filelog/s-01M2M5GMC88HASJV6R9KV1C7VB`
+- A `forward/d-<destination>` connector Bindplane uses to wire sources to destinations internally
+- The full expanded pipeline — all receivers, processors, extensions, exporters, and service block
+- Platform-specific paths resolved: `${OIQ_OTEL_COLLECTOR_HOME}/log/collector.log`
+
+Store these files in `bindplane/generated-otel/` only. They are output artifacts — not authoring inputs.
+
+### What happens if you apply the generated OTel YAML back to Bindplane?
+
+You can wrap it in a `contentType: raw` manifest and apply it. Bindplane will accept it. But:
+
+- **UI shows YAML editor only** — it will not render as a visual pipeline, regardless of what was generated from
+- **Component names have internal ULID suffixes** (e.g. `filelog/s-01ABCDEF...`) — these are Bindplane's internal namespacing to avoid conflicts across multiple sources in the same pipeline; they look messy as authored YAML
+- **Contains Bindplane-internal connector patterns** (`forward/d-<destination>`) that make sense when generated but are awkward to maintain by hand
+- **Platform and version specific** — generated against a particular collector's installed component versions; not portable across collector types
+- **Cannot be converted back to modular** — once applied as raw, Bindplane has no mechanism to reverse-engineer it into typed source/destination components
+
+**The generated OTel is an output artifact, not an input format.** Use `generated-otel/` for archiving what the collector runs at a point in time. Use `lab/` for what you author and manage.
 
 ---
 
