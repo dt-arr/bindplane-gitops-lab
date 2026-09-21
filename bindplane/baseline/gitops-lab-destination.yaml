@@ -1,0 +1,12 @@
+apiVersion: bindplane.observiq.com/v1
+kind: Destination
+metadata:
+    name: gitops-lab-destination
+spec:
+    type: dev_null
+    parameters:
+        - name: telemetry_types
+          value:
+            - Logs
+        - name: drop_raw_copy
+          value: true

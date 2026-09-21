@@ -1,0 +1,22 @@
+# REVIEW DRAFT: confirm rollout parameter mapping before applying this file.
+# Server schema exposes startAutomatically, but this parameter mapping is unverified.
+apiVersion: bindplane.observiq.com/v1
+kind: Configuration
+metadata:
+  name: gitops-lab-config
+  labels:
+    platform: linux
+    agent-type: bindplane-otel-collector
+spec:
+  sources:
+    - name: gitops-lab-source
+  destinations:
+    - name: gitops-lab-destination
+  selector:
+    matchLabels:
+      gitops-lab-id: gitops-lab-roundtrip-20260921
+  rollout:
+    type: standard
+    parameters:
+      - name: startAutomatically
+        value: false

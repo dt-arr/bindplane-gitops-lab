@@ -1,0 +1,30 @@
+# Authentication and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*credentials*
+*secret*
+*.token
+.bindplane/
+profiles/
+*.local.*
+bindplane-cli.yaml
+bindplane-cli.yml
+# Discovery and unreviewed generated configuration
+evidence/private/
+bindplane/generated-otel/private/
+# Temporary files and runtime state
+*.log
+*.tmp
+*.temp
+*.bak
+*~
+.tmp/
+tmp/
+.tools/
+docker/data/
+docker/runtime/

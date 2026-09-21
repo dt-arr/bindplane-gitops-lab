@@ -1,0 +1,12 @@
+apiVersion: bindplane.observiq.com/v1
+kind: Fleet
+metadata:
+    name: gitops-lab-fleet
+    labels:
+        agent-type: bindplane-otel-collector
+        platform: linux
+spec:
+    configuration: ""
+    selector:
+        matchLabels:
+            gitops-lab-id: gitops-lab-roundtrip-20260921

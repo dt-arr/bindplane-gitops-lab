@@ -1,0 +1,13 @@
+# Applied in Phase 2A. Secret-free equivalent of this project's null-destination.
+apiVersion: bindplane.observiq.com/v1
+kind: Destination
+metadata:
+  name: gitops-lab-destination
+spec:
+  type: dev_null:1
+  parameters:
+    - name: telemetry_types
+      value: [Logs]
+    - name: drop_raw_copy
+      value: true
+

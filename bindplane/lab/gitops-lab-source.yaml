@@ -1,0 +1,19 @@
+# Applied in Phase 2A. Adapted from the Syslog source type used by windows.
+apiVersion: bindplane.observiq.com/v1
+kind: Source
+metadata:
+  name: gitops-lab-source
+spec:
+  type: syslog:2
+  parameters:
+    - name: listen_ip
+      value: 0.0.0.0
+    - name: listen_port
+      value: 5514
+    - name: protocol
+      value: rfc5424
+    - name: connection_type
+      value: udp
+    - name: data_flow
+      value: low
+

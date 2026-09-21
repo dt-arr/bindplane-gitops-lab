@@ -1,0 +1,13 @@
+# Applied in Phase 2A: empty fleet. Configuration assignment is deferred to a later step.
+apiVersion: bindplane.observiq.com/v1
+kind: Fleet
+metadata:
+  name: gitops-lab-fleet
+  labels:
+    platform: linux
+    agent-type: bindplane-otel-collector
+spec:
+  selector:
+    matchLabels:
+      gitops-lab-id: gitops-lab-roundtrip-20260921
+

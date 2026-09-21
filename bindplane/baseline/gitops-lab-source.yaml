@@ -1,0 +1,59 @@
+apiVersion: bindplane.observiq.com/v1
+kind: Source
+metadata:
+    name: gitops-lab-source
+spec:
+    type: syslog
+    parameters:
+        - name: listen_ip
+          value: 0.0.0.0
+        - name: listen_port
+          value: 5514
+        - name: protocol
+          value: rfc5424
+        - name: connection_type
+          value: udp
+        - name: data_flow
+          value: low
+        - name: log_type
+          value: ""
+        - name: timezone
+          value: UTC
+        - name: parse_to
+          value: body
+        - name: multiline_parsing
+          value: none
+        - name: multiline_line_start_pattern
+          value: ""
+        - name: multiline_line_end_pattern
+          value: ""
+        - name: add_attributes
+          value: false
+        - name: enable_octet_counting
+          value: false
+        - name: enable_non_transparent_framing_trailer
+          value: false
+        - name: non_transparent_framing_trailer
+          value: LF
+        - name: preserve_leading_whitespaces
+          value: false
+        - name: preserve_trailing_whitespaces
+          value: false
+        - name: enable_mutual_tls
+          value: false
+        - name: cert_file
+          value: ""
+        - name: key_file
+          value: ""
+        - name: ca_file
+          value: ""
+        - name: tls_min_version
+          value: "1.2"
+        - name: max_log_size
+          value: 1MiB
+        - name: async_readers
+          value: 1
+        - name: async_processors
+          value: 3
+        - name: max_queue_length
+          value: 100
