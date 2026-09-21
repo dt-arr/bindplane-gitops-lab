@@ -1,6 +1,6 @@
 # Bindplane GitOps Lab
 
-Demonstrates managing OTel collector configuration through Git using Bindplane as the distribution layer. Covers two configuration models — **raw OTel YAML** and **Bindplane modular (component) configs** — with round-trip proof between Git, the Bindplane UI, and a live collector via OpAMP.
+Demonstrates managing OTel collector configuration through Git using Bindplane as the distribution layer. Covers two configuration models - **raw OTel YAML** and **Bindplane modular (component) configs** - with round-trip proof between Git, the Bindplane UI, and a live collector via OpAMP.
 
 ---
 
@@ -9,11 +9,11 @@ Demonstrates managing OTel collector configuration through Git using Bindplane a
 ```
 bindplane-gitops-lab/
 ├── bindplane/
-│   ├── baseline/              # Exported snapshots from Bindplane — what the server currently holds
+│   ├── baseline/              # Exported snapshots from Bindplane - what the server currently holds
 │   │   ├── windows-config.yaml
 │   │   ├── gitops-lab-raw-config.yaml
 │   │   └── gitops-lab-source.yaml / destination / fleet
-│   ├── lab/                   # Authored manifests — what you edit in Git and apply to BindPlane
+│   ├── lab/                   # Authored manifests - what you edit in Git and apply to BindPlane
 │   │   ├── gitops-lab-raw-config.yaml
 │   │   ├── gitops-lab-agent-config.yaml
 │   │   └── gitops-lab-source.yaml / destination / fleet / config
@@ -31,8 +31,8 @@ bindplane-gitops-lab/
 
 **The key distinction between `baseline/` and `lab/`:**
 
-- `lab/` is what **you author and control** — pinned type versions, minimal parameters, your source of truth before first apply
-- `baseline/` is what **Bindplane holds** — exported after apply or after a UI edit, expanded defaults included
+- `lab/` is what **you author and control** - pinned type versions, minimal parameters, your source of truth before first apply
+- `baseline/` is what **Bindplane holds** - exported after apply or after a UI edit, expanded defaults included
 - After a UI edit, export into `baseline/` and diff against `lab/` to decide what to promote back
 
 > Never commit API keys, collector IDs, enrollment secrets, or unreviewed exports. Review every export before placing it in a tracked directory.
@@ -93,7 +93,7 @@ Use this when someone edits a config in the Bindplane UI and you need to capture
 # 1. Export the current server state
 bindplane get configurations <config-name> --export -o yaml --profile <profile> > bindplane/baseline/<config-name>.yaml
 
-# 2. Review the file — check for credentials or internal IDs you don't want tracked
+# 2. Review the file - check for credentials or internal IDs you don't want tracked
 # 3. Diff against your lab/ file to see what actually changed
 git diff bindplane/baseline/<config-name>.yaml
 
@@ -104,9 +104,9 @@ git commit -m "sync: capture UI edit to <config-name>"
 ```
 
 **What to expect in the export diff:**
-- Bindplane adds `measurementInterval`, `topologyInterval`, `disableLegacyEnvVarNormalization` — always present, always empty/false, safe to commit
-- Source type versions are stripped (e.g. `syslog:2` → `syslog`) and defaults are expanded — expected behaviour
-- Source IDs (server-assigned ULIDs) appear in v2 modular exports — keep them so re-applying updates in place rather than creating duplicates
+- Bindplane adds `measurementInterval`, `topologyInterval`, `disableLegacyEnvVarNormalization` - always present, always empty/false, safe to commit
+- Source type versions are stripped (e.g. `syslog:2` → `syslog`) and defaults are expanded - expected behaviour
+- Source IDs (server-assigned ULIDs) appear in v2 modular exports - keep them so re-applying updates in place rather than creating duplicates
 - Raw OTel content (`spec.raw`) comes back byte-identical
 
 ### Keeping Git and UI in sync
@@ -132,15 +132,15 @@ git commit -m "sync: capture UI edit to <config-name>"
 
 ### Why you can't mix them
 
-Bindplane source types (`bindplane-agent`, `syslog`, `windowsevents_v3`) are server-side abstractions. Bindplane expands them into real OTel components (`filelog`, `prometheus`, etc.) based on the collector's platform and component versions. Raw OTel YAML must only contain real OTel component names — the collector rejects anything else. You must choose one model per configuration.
+Bindplane source types (`bindplane-agent`, `syslog`, `windowsevents_v3`) are server-side abstractions. Bindplane expands them into real OTel components (`filelog`, `prometheus`, etc.) based on the collector's platform and component versions. Raw OTel YAML must only contain real OTel component names - the collector rejects anything else. You must choose one model per configuration.
 
 ---
 
-## Model 1 — Raw OTel YAML
+## Model 1 - Raw OTel YAML
 
 Use when you want full, explicit control over the OTel pipeline.
 
-### Manifest — `bindplane/lab/gitops-lab-raw-config.yaml`
+### Manifest - `bindplane/lab/gitops-lab-raw-config.yaml`
 
 ```yaml
 apiVersion: bindplane.observiq.com/v1
@@ -171,16 +171,16 @@ spec:
 ```
 
 **Key points:**
-- `contentType: raw` — Bindplane stores and delivers the YAML unchanged
+- `contentType: raw` - Bindplane stores and delivers the YAML unchanged
 - `spec.raw` contains standard OTel YAML
 - The selector label `configuration` **must match** the configuration name (Bindplane enforces this)
 - Assign a collector by labelling it with `configuration=gitops-lab-raw-config`
-- UI shows a plain YAML editor — no visual pipeline
+- UI shows a plain YAML editor - no visual pipeline
 
-**BindPlane UI — raw config (YAML editor view):**
+**BindPlane UI - raw config (YAML editor view):**
 ![Raw config YAML editor](img/gitops-lab-raw-config-bindplane-screenshot.png)
 
-**BindPlane UI — recent telemetry for raw config:**
+**BindPlane UI - recent telemetry for raw config:**
 ![Raw config recent telemetry](img/gitops-lab-raw-config-bindplane-view-recent-telemetry.png)
 
 ### Apply and roll out
@@ -202,7 +202,7 @@ bindplane get configurations gitops-lab-raw-config --export -o yaml --profile <p
   > bindplane/baseline/gitops-lab-raw-config.yaml
 ```
 
-Exported baseline will include these three extra fields — add them to your `lab/` file to keep diffs clean:
+Exported baseline will include these three extra fields - add them to your `lab/` file to keep diffs clean:
 ```yaml
 spec:
   measurementInterval: ""
@@ -216,15 +216,15 @@ spec:
 bindplane get configurations gitops-lab-raw-config -o raw --profile <profile>
 ```
 
-For raw configs this matches `spec.raw` exactly. For modular configs it returns the full generated OTel — useful for debugging or archiving in `bindplane/generated-otel/`.
+For raw configs this matches `spec.raw` exactly. For modular configs it returns the full generated OTel - useful for debugging or archiving in `bindplane/generated-otel/`.
 
 ---
 
-## Model 2 — Modular (component) config
+## Model 2 - Modular (component) config
 
 Use when you want the visual pipeline UI and BindPlane-managed component abstractions.
 
-### Manifest — `bindplane/lab/gitops-lab-agent-config.yaml`
+### Manifest - `bindplane/lab/gitops-lab-agent-config.yaml`
 
 ```yaml
 apiVersion: bindplane.observiq.com/v2
@@ -287,17 +287,17 @@ spec:
 ```
 
 **Key points:**
-- `apiVersion: v2` — the modular format; sources are typed Bindplane components, not raw OTel
-- `type: bindplane-agent` — a Bindplane abstraction; Bindplane expands it to `filelog` + `prometheus` + `file_storage` based on the collector's platform and installed component versions
+- `apiVersion: v2` - the modular format; sources are typed Bindplane components, not raw OTel
+- `type: bindplane-agent` - a Bindplane abstraction; Bindplane expands it to `filelog` + `prometheus` + `file_storage` based on the collector's platform and installed component versions
 - `routes` wire each signal type (logs, metrics, traces) from source to destination components
 - Destination `id: d-null-destination` is the internal reference; `name` points to the existing Bindplane Destination resource
 - UI shows the visual pipeline builder with source/destination tiles and routing lines
-- After export, source IDs (server-assigned ULIDs) appear — keep them in the tracked file
+- After export, source IDs (server-assigned ULIDs) appear - keep them in the tracked file
 
-**BindPlane UI — modular config (visual pipeline view):**
+**BindPlane UI - modular config (visual pipeline view):**
 ![Modular config visual pipeline](img/gitops-lab-agent-config-screenshot.png)
 
-**BindPlane UI — recent telemetry with processors expanded:**
+**BindPlane UI - recent telemetry with processors expanded:**
 ![Modular config recent telemetry with processors](img/gitops-lab-agent-config-bindplane-view-recent-with-processors.png)
 
 ### Apply and roll out
@@ -319,7 +319,7 @@ bindplane get configurations gitops-lab-agent-config --export -o yaml --profile 
   > bindplane/baseline/gitops-lab-agent-config.yaml
 ```
 
-The export is in the same v2 modular format. Source IDs are included — keep them so re-applying updates existing sources rather than creating duplicates.
+The export is in the same v2 modular format. Source IDs are included - keep them so re-applying updates existing sources rather than creating duplicates.
 
 ---
 
@@ -341,20 +341,20 @@ bindplane get configurations gitops-lab-agent-config -o raw --profile <profile> 
 **What you will see in the output:**
 - Receiver names suffixed with internal ULIDs: `filelog/s-01M2M5GMC88HASJV6R9KV1C7VB`
 - A `forward/d-<destination>` connector Bindplane uses to wire sources to destinations internally
-- The full expanded pipeline — all receivers, processors, extensions, exporters, and service block
+- The full expanded pipeline - all receivers, processors, extensions, exporters, and service block
 - Platform-specific paths resolved: `${OIQ_OTEL_COLLECTOR_HOME}/log/collector.log`
 
-Store these files in `bindplane/generated-otel/` only. They are output artifacts — not authoring inputs.
+Store these files in `bindplane/generated-otel/` only. They are output artifacts - not authoring inputs.
 
 ### What happens if you apply the generated OTel YAML back to Bindplane?
 
 You can wrap it in a `contentType: raw` manifest and apply it. Bindplane will accept it. But:
 
-- **UI shows YAML editor only** — it will not render as a visual pipeline, regardless of what was generated from
-- **Component names have internal ULID suffixes** (e.g. `filelog/s-01ABCDEF...`) — these are Bindplane's internal namespacing to avoid conflicts across multiple sources in the same pipeline; they look messy as authored YAML
+- **UI shows YAML editor only** - it will not render as a visual pipeline, regardless of what was generated from
+- **Component names have internal ULID suffixes** (e.g. `filelog/s-01ABCDEF...`) - these are Bindplane's internal namespacing to avoid conflicts across multiple sources in the same pipeline; they look messy as authored YAML
 - **Contains Bindplane-internal connector patterns** (`forward/d-<destination>`) that make sense when generated but are awkward to maintain by hand
-- **Platform and version specific** — generated against a particular collector's installed component versions; not portable across collector types
-- **Cannot be converted back to modular** — once applied as raw, Bindplane has no mechanism to reverse-engineer it into typed source/destination components
+- **Platform and version specific** - generated against a particular collector's installed component versions; not portable across collector types
+- **Cannot be converted back to modular** - once applied as raw, Bindplane has no mechanism to reverse-engineer it into typed source/destination components
 
 **The generated OTel is an output artifact, not an input format.** Use `generated-otel/` for archiving what the collector runs at a point in time. Use `lab/` for what you author and manage.
 
