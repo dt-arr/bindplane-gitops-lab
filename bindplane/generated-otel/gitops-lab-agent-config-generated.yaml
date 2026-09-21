@@ -1,0 +1,131 @@
+# This configuration is managed by Bindplane.
+# Configuration: gitops-lab-agent-config:1
+receivers:
+    file_log/s-01M317S3HM1MX48QWB63XJKJNH:
+        include:
+            - ${OIQ_OTEL_COLLECTOR_HOME}/log/collector.log
+            - ${OIQ_OTEL_COLLECTOR_HOME}/log/updater.log
+            - ${OIQ_OTEL_COLLECTOR_HOME}/log/observiq_collector.err
+        include_file_name: true
+        include_file_name_resolved: false
+        include_file_path: false
+        include_file_path_resolved: false
+        max_concurrent_files: 1024
+        operators:
+            - from: body
+              id: save_log_record_original
+              to: attributes["log.record.original"]
+              type: copy
+            - parse_to: body
+              severity:
+                parse_from: body.level
+              timestamp:
+                layout: '%Y-%m-%dT%H:%M:%S.%f%z'
+                location: UTC
+                parse_from: body.ts
+              type: json_parser
+            - field: attributes.log_type
+              type: add
+              value: bindplane-agent
+        poll_interval: 200ms
+        retry_on_failure:
+            enabled: false
+        start_at: end
+        storage: file_storage/s-01M317S3HM1MX48QWB63XJKJNH
+    prometheus/s-01M317S3HM1MX48QWB63XJKJNH:
+        config:
+            scrape_configs:
+                - job_name: bindplane-agent
+                  scrape_interval: 1m0s
+                  static_configs:
+                    - targets:
+                        - localhost:8888
+processors:
+    filter/s-01M317S3HM1MX48QWB63XJKJNH:
+        metrics:
+            exclude:
+                match_type: regexp
+                metric_names: null
+            include:
+                match_type: regexp
+                metric_names:
+                    - otelcol_.*
+    resource_detection/s-01M317S3HM1MX48QWB63XJKJNH:
+        detectors:
+            - system
+        system:
+            hostname_sources:
+                - os
+    transform/null-destination__drop-raw-copy:
+        log_statements:
+            - context: log
+              statements:
+                - delete_key(attributes, "log.record.original")
+    transform/s-01M317S3HM1MX48QWB63XJKJNH:
+        error_mode: ignore
+        metric_statements:
+            - context: datapoint
+              statements:
+                - delete_key(resource.attributes, "http.scheme") where true
+                - delete_key(resource.attributes, "net.host.port") where true
+                - delete_key(resource.attributes, "os.type") where true
+                - delete_key(resource.attributes, "service_instance_id") where true
+                - delete_key(resource.attributes, "service_name") where true
+                - delete_key(resource.attributes, "service_version") where true
+                - delete_key(attributes, "service_instance_id") where true
+                - delete_key(attributes, "service_name") where true
+                - delete_key(attributes, "service_version") where true
+                - delete_key(attributes, "transport") where true
+connectors:
+    forward/d-d-null-destination: null
+exporters:
+    nop/null-destination: null
+extensions:
+    file_storage/s-01M317S3HM1MX48QWB63XJKJNH:
+        compaction:
+            directory: ${OIQ_OTEL_COLLECTOR_HOME}/storage
+            on_rebound: true
+        directory: ${OIQ_OTEL_COLLECTOR_HOME}/storage
+service:
+    extensions:
+        - file_storage/s-01M317S3HM1MX48QWB63XJKJNH
+    pipelines:
+        logs/d-d-null-destination:
+            receivers:
+                - forward/d-d-null-destination
+            processors:
+                - transform/null-destination__drop-raw-copy
+            exporters:
+                - nop/null-destination
+        logs/s-01M317S3HM1MX48QWB63XJKJNH:
+            receivers:
+                - file_log/s-01M317S3HM1MX48QWB63XJKJNH
+            processors:
+                - resource_detection/s-01M317S3HM1MX48QWB63XJKJNH
+            exporters:
+                - forward/d-d-null-destination
+        metrics/d-d-null-destination:
+            receivers:
+                - forward/d-d-null-destination
+            processors: []
+            exporters:
+                - nop/null-destination
+        metrics/s-01M317S3HM1MX48QWB63XJKJNH:
+            receivers:
+                - prometheus/s-01M317S3HM1MX48QWB63XJKJNH
+            processors:
+                - filter/s-01M317S3HM1MX48QWB63XJKJNH
+                - transform/s-01M317S3HM1MX48QWB63XJKJNH
+                - resource_detection/s-01M317S3HM1MX48QWB63XJKJNH
+            exporters:
+                - forward/d-d-null-destination
+    telemetry:
+        metrics:
+            readers:
+                - pull:
+                    exporter:
+                        prometheus:
+                            host: localhost
+                            port: 8888
+            level: detailed
+

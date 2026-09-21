@@ -198,8 +198,7 @@ bindplane rollout status gitops-lab-raw-config --profile <profile>
 ### Export back to Git
 
 ```powershell
-bindplane get configurations gitops-lab-raw-config --export -o yaml --profile <profile> `
-  > bindplane/baseline/gitops-lab-raw-config.yaml
+bindplane get configurations gitops-lab-raw-config --export -o yaml --profile <profile> > bindplane/baseline/gitops-lab-raw-config.yaml
 ```
 
 Exported baseline will include these three extra fields - add them to your `lab/` file to keep diffs clean:
@@ -213,7 +212,7 @@ spec:
 ### View what the collector actually runs
 
 ```powershell
-bindplane get configurations gitops-lab-raw-config -o raw --profile <profile>
+bindplane get configurations gitops-lab-raw-config -o raw --profile <profile> > bindplane/generated-otel/gitops-lab-raw-config-generated.yaml
 ```
 
 For raw configs this matches `spec.raw` exactly. For modular configs it returns the full generated OTel - useful for debugging or archiving in `bindplane/generated-otel/`.
@@ -315,8 +314,7 @@ bindplane rollout status gitops-lab-agent-config --profile <profile>
 ### Export after a UI edit
 
 ```powershell
-bindplane get configurations gitops-lab-agent-config --export -o yaml --profile <profile> `
-  > bindplane/baseline/gitops-lab-agent-config.yaml
+bindplane get configurations gitops-lab-agent-config --export -o yaml --profile <profile> > bindplane/baseline/gitops-lab-agent-config.yaml
 ```
 
 The export is in the same v2 modular format. Source IDs are included - keep them so re-applying updates existing sources rather than creating duplicates.
@@ -334,8 +332,13 @@ bindplane get configurations gitops-lab-agent-config -o raw --profile <profile>
 Save it for reference (not for re-applying):
 
 ```powershell
-bindplane get configurations gitops-lab-agent-config -o raw --profile <profile> `
-  > bindplane/generated-otel/gitops-lab-agent-config-generated.yaml
+bindplane get configurations gitops-lab-agent-config -o raw --profile <profile> > bindplane/generated-otel/gitops-lab-agent-config-generated.yaml
+```
+
+For the raw config:
+
+```powershell
+bindplane get configurations gitops-lab-raw-config -o raw --profile <profile> > bindplane/generated-otel/gitops-lab-raw-config-generated.yaml
 ```
 
 **What you will see in the output:**
